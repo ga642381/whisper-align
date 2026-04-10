@@ -73,6 +73,17 @@ whisper-align \
   --slurm-profile a5
 ```
 
+If you need to override only the partition while keeping the rest of the profile:
+
+```bash
+whisper-align \
+  --in-dir /path/to/audio \
+  --out-dir /path/to/alignment \
+  --shards 4 \
+  --slurm-profile a5 \
+  --partition-override some_other_partition
+```
+
 You can also pass your own config file:
 
 ```bash

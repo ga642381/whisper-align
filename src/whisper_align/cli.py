@@ -57,9 +57,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--lang", default="en", help="Force the language.")
     parser.add_argument(
+        "--partition-override",
         "--partition",
+        dest="partition_override",
         default="",
-        help="Optional SLURM partition override.",
+        help="Optional SLURM partition override for the selected profile or config.",
     )
     parser.add_argument(
         "--slurm-config",
@@ -208,7 +210,7 @@ def main() -> int:
         log_folder=args.log_folder.expanduser(),
         config_path=args.slurm_config,
         profile_name=args.slurm_profile,
-        partition_override=args.partition,
+        partition_override=args.partition_override,
     )
     submit_and_monitor(params, slurm_config)
     return 0
