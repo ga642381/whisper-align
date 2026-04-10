@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "whisper-align"
+version = "0.1.0"
+description = "Internal Whisper alignment tooling for the Game-Time and TiCo projects."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "auditok>=0.4.1",
+    "numpy>=1.26",
+    "sphn>=0.2.1",
+    "torch>=2.4",
+    "torchaudio>=2.4",
+    "whisper-timestamped>=1.15.9",
+]
+
+[project.optional-dependencies]
+plot = ["matplotlib>=3.8"]
+slurm = [
+    "PyYAML>=6.0",
+    "submitit>=1.5.4",
+]
+
+[project.scripts]
+whisper-align = "whisper_align.cli:main"
+
+[project.urls]
+Repository = "https://github.com/ga642381/whisper-align"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+whisper_align = ["configs/*.yaml"]
