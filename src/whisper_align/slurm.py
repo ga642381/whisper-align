@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from importlib.resources import as_file, files
 import time
 from pathlib import Path
 
@@ -8,24 +7,23 @@ from whisper_align.config import AlignParams, SlurmConfig
 
 
 def load_slurm_config(
-    config_path: Path | None,
+    config_path: Path,
     log_folder: Path,
     partition_override: str = "",
 ) -> SlurmConfig:
     data: dict = {"folder": log_folder}
 
-    if config_path is not None:
-        try:
-            import yaml
-        except ImportError as exc:
-            raise RuntimeError(
-                "PyYAML is required for --slurm-config. Install whisper-align with the [slurm] extra."
-            ) from exc
+    try:
+        import yaml
+    except ImportError as exc:
+        raise RuntimeError(
+            "PyYAML is required for --slurm-config. Install whisper-align with the [slurm] extra."
+        ) from exc
 
-        raw = yaml.safe_load(config_path.read_text()) or {}
-        if not isinstance(raw, dict):
-            raise ValueError(f"SLURM config {config_path} must contain a mapping at the top level.")
-        data.update(raw)
+    raw = yaml.safe_load(config_path.read_text()) or {}
+    if not isinstance(raw, dict):
+        raise ValueError(f"SLURM config {config_path} must contain a mapping at the top level.")
+    data.update(raw)
 
     if "time" in data and "time_minutes" not in data:
         data["time_minutes"] = data.pop("time")
@@ -40,48 +38,14 @@ def load_slurm_config(
     return config
 
 
-def available_slurm_profiles() -> list[str]:
-    profile_dir = files("whisper_align.configs")
-    profiles = []
-    for path in profile_dir.iterdir():
-        if path.suffix != ".yaml":
-            continue
-        name = path.stem
-        if name.startswith("slurm_"):
-            name = name.removeprefix("slurm_")
-        profiles.append(name)
-    return sorted(set(profiles))
-
-
-def load_slurm_profile(
-    profile_name: str,
-    log_folder: Path,
-    partition_override: str = "",
-) -> SlurmConfig:
-    profile_dir = files("whisper_align.configs")
-    candidates = [
-        profile_dir.joinpath(f"{profile_name}.yaml"),
-        profile_dir.joinpath(f"slurm_{profile_name}.yaml"),
-    ]
-    profile_path = next((path for path in candidates if path.is_file()), None)
-    if profile_path is None:
-        known = ", ".join(available_slurm_profiles()) or "<none>"
-        raise ValueError(f"Unknown SLURM profile {profile_name!r}. Available profiles: {known}")
-    with as_file(profile_path) as resolved_path:
-        return load_slurm_config(resolved_path, log_folder, partition_override)
-
-
 def resolve_slurm_config(
     *,
     log_folder: Path,
-    config_path: Path | None = None,
-    profile_name: str | None = None,
+    config_path: Path | None,
     partition_override: str = "",
 ) -> SlurmConfig:
-    if config_path is not None and profile_name is not None:
-        raise ValueError("Pass either config_path or profile_name, not both.")
-    if profile_name is not None:
-        return load_slurm_profile(profile_name, log_folder, partition_override)
+    if config_path is None:
+        raise ValueError("config_path is required. Keep machine-specific SLURM YAML in the local consumer repo.")
     return load_slurm_config(config_path, log_folder, partition_override)
 
 

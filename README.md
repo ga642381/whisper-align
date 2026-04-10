@@ -59,7 +59,7 @@ whisper-align \
 
 ## SLURM Usage
 
-Using a built-in SLURM profile bundled with the package:
+Keep machine-specific SLURM YAML in the local consumer repo, not in this package.
 
 ```bash
 whisper-align \
@@ -70,17 +70,17 @@ whisper-align \
   --channel-mode single \
   --keep-silence-in-segments \
   --shards 4 \
-  --slurm-profile a5
+  --slurm-config /path/to/slurm_a5.yaml
 ```
 
-If you need to override only the partition while keeping the rest of the profile:
+If you need to override only the partition while keeping the rest of the local config:
 
 ```bash
 whisper-align \
   --in-dir /path/to/audio \
   --out-dir /path/to/alignment \
   --shards 4 \
-  --slurm-profile a5 \
+  --slurm-config /path/to/slurm_a5.yaml \
   --partition-override some_other_partition
 ```
 
@@ -94,7 +94,7 @@ whisper-align \
   --slurm-config /path/to/slurm.yaml
 ```
 
-Add a new YAML file or packaged profile for each cluster or queue policy instead of hardcoding machine-specific parameters in Python.
+Add a new YAML file for each cluster or queue policy instead of hardcoding machine-specific parameters in Python or shipping them inside the package.
 
 ## Python API
 
@@ -118,7 +118,7 @@ run(params)
 
 slurm = resolve_slurm_config(
     log_folder=Path("/tmp/whisper-align"),
-    profile_name="a5",
+    config_path=Path("/path/to/slurm_a5.yaml"),
 )
 submit_and_monitor(params, slurm)
 ```

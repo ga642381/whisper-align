@@ -7,7 +7,7 @@ from pathlib import Path
 from whisper_align.config import AlignParams
 from whisper_align.core import init_logging
 from whisper_align.runner import run
-from whisper_align.slurm import available_slurm_profiles, resolve_slurm_config, submit_and_monitor
+from whisper_align.slurm import resolve_slurm_config, submit_and_monitor
 
 logger = logging.getLogger(__name__)
 
@@ -67,13 +67,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--slurm-config",
         type=Path,
         default=None,
-        help="Optional YAML file with cluster-specific submitit parameters.",
-    )
-    parser.add_argument(
-        "--slurm-profile",
-        choices=available_slurm_profiles(),
-        default=None,
-        help="Optional built-in SLURM profile shipped with the package.",
+        help="YAML file with cluster-specific submitit parameters.",
     )
     parser.add_argument(
         "--channel-mode",
@@ -205,11 +199,12 @@ def main() -> int:
 
     if args.shard != 0:
         logger.warning("--shard is ignored for SLURM submission; all shards will be scheduled.")
+    if args.slurm_config is None:
+        parser.error("--slurm-config is required for SLURM execution.")
 
     slurm_config = resolve_slurm_config(
         log_folder=args.log_folder.expanduser(),
         config_path=args.slurm_config,
-        profile_name=args.slurm_profile,
         partition_override=args.partition_override,
     )
     submit_and_monitor(params, slurm_config)
