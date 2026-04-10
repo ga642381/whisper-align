@@ -24,6 +24,7 @@ def load_slurm_config(
     if not isinstance(raw, dict):
         raise ValueError(f"SLURM config {config_path} must contain a mapping at the top level.")
     data.update(raw)
+    data.pop("shards", None)
 
     if "time" in data and "time_minutes" not in data:
         data["time_minutes"] = data.pop("time")
